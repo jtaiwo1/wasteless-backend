@@ -1,0 +1,48 @@
+services:
+  wasteless-api:
+    image: jtaiwo1/wasteless-api-cloud:latest
+    build:
+      context: ./server
+    ports:
+      - "80:80"
+    restart: always
+    environment:
+      PORT: 80
+      DB_HOST: wasteless-db
+      DB_USER: postgres
+      DB_NAME: wasteless
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      DB_PORT: 5432
+      INSIGHTS_URL: http://wasteless-insights:8000
+    depends_on:
+      - wasteless-db
+      - wasteless-insights
+    networks:
+      - wasteless-network
+
+  wasteless-insights:
+    image: jtaiwo1/wasteless-insights-cloud:latest
+    build:
+      context: ./insights
+    restart: always
+    networks:
+      - wasteless-network
+
+  wasteless-db:
+    image: jtaiwo1/wasteless-db-cloud:latest
+    build:
+      context: ./db
+    environment:
+      POSTGRES_DB: wasteless
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+    volumes:
+      - wasteless-data:/var/lib/postgresql/data
+    restart: always
+    networks:
+      - wasteless-network
+
+networks:
+  wasteless-network:
+
+volumes:
+  wasteless-data:
