@@ -49,4 +49,34 @@ async function register(req, res) {
   }
 }
 
-module.exports = { index, getByUsername, register };
+async function login(req, res) {
+    try{
+        const data = req.body;
+
+        if(!data.username || !data.password){
+            res.status(400).send({error: "Missing username or password"});
+        }
+
+        const user = await User.getByUsername(data.username);
+
+        const match = await bcrypt.compare(data.password, user.password)
+        if(!match) {
+            res.status(401).send({error: "The password is incorrect"});
+        }
+
+        const payload = { user_id: user.user_id }
+        const sendToken = (err, token) => {
+            if(err){ throw new Error("Error generating token")};
+            res.status(200).send({
+                success: true,
+                token: token,
+            })
+        }
+
+        jwt.sign(payload, process.env.JWT_SECRET, {expiresIn: 7200 }, sendToken);
+    } catch(err) {
+        res.status(404).send({error: err.message})
+    }
+}
+
+module.exports = { index, getByUsername, register, login };
