@@ -12,6 +12,7 @@ services:
       DB_USER: postgres
       DB_NAME: wasteless
       DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      BCRYPT_SALT_ROUNDS: ${BCRYPT_SALT_ROUNDS:-10}
       DB_PORT: 5432
       INSIGHTS_URL: http://wasteless-insights:8000
     depends_on:
