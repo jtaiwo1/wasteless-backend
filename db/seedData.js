@@ -29,7 +29,7 @@ async function seedDataBase() {
             const expiryDate = genExpiryDate(status);
 
             await db.query(
-                'INSERT INTO pantry_items (name, quantity, expiry_date, status) VALUES ($1, $2, $3, $4)',
+                'INSERT INTO pantry (name, quantity, expiry_date, status) VALUES ($1, $2, $3, $4)',
                 [name, quantity, expiryDate, statuses]
             );
 
