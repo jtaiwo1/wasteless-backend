@@ -34,6 +34,8 @@ services:
     image: jtaiwo1/wasteless-db-cloud:latest
     build:
       context: ./db
+    ports:
+      - "5432:5432"
     environment:
       POSTGRES_DB: wasteless
       POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
