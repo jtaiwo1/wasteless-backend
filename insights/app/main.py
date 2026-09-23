@@ -12,7 +12,7 @@ def health():
 def analytics(items: list[dict]):
     
     df = pd.DataFrame(items)
-    df['expiry_date'] = pd.to_datetime(df[expiry_date])
+    df['expiry_date'] = pd.to_datetime(df['expiry_date'])
 
     total_quantity = df['quantity'].sum()
 
