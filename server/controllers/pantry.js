@@ -61,7 +61,7 @@ async function deleteItem(req,res) {
     const result = await item.destroy();
     res.status(204).json(result);
   } catch(err) {
-    
+    res.status(404).json({error: err.message })
   }
 }
 module.exports = { index, findById, addItem, updateStatus, deleteItem};
