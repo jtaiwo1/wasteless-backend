@@ -35,7 +35,6 @@ async function addItem(req,res) {
 
 async function updateStatus(req, res) {
   try {
-    const validStatuses = ["available", "donated", "used", "wasted"];
     const id = req.params.id;
     const { status } = req.body;
 
