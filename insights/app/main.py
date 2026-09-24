@@ -11,12 +11,13 @@ def health():
 @app.post("/analytics")
 def analytics(items: list[dict]):
 
-    print(f"SUCCESS: Received {len(items)} items from Express!")
-    if len(items) > 0:
-        print("Sample item:", items[0])
+
     
     df = pd.DataFrame(items)
     df['expiry_date'] = pd.to_datetime(df['expiry_date'])
+    df['status_update_date'] = pd.to_datetime(df['status_update_date'])
+
+
 
     total_quantity = df['quantity'].sum()
 
@@ -32,7 +33,31 @@ def analytics(items: list[dict]):
     used_percentage = round((total_used / total_quantity) * 100, 2) if total_quantity > 0 else 0
     available_percentage = round((total_available / total_quantity) * 100, 2) if total_quantity > 0 else 0
 
-    # Advanced
+    # Advanced Monhtly
+    df['effective_date'] = df['status_update_at'].fillna(df['expiry_date'])
+    df['year_month'] = df['effective'].dt.to_period('M').astype(str)
+
+    monthly = df.groupby(['year_month', 'status'])['quantity'].sum().unstack(fill_value=0)
+
+    for status_name in ['wasted', 'used', 'donated', 'available']:
+        if status_name not in monthly.columns:
+            monthly[status_name] = 0
+
+    monthly_analysis = monthly.reset_index().to_dict(orient='records')
+
+    # Expiring soon
+    today = pd.Timestamp.now()
+    next_7_days = today + pd.Timedelta(days=7)
+
+    expiring_soon_df = df[
+        (df['status'] == 'available') &
+        (df['expiry_date'] >= today) &
+        (df['expiry_date'] <= next_7_days)
+    ]
+
+    total_expiring_soon = int(expiring_soon_df['quantity'].sum()) if not expiring_soon_df.empty else 0
+
+    expiring_soon_items = expiring_soon_df[['name', 'quantity', 'expiry_date']].to_dict(orient='records')
 
 
     
@@ -46,4 +71,5 @@ def analytics(items: list[dict]):
         "used_percentage": used_percentage,
         "total_available": total_available,
         "available_percentage": available_percentage,
+        "monthly_analysis" : monthly_analysis
     }
