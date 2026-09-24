@@ -13,17 +13,21 @@ async function findById(req,res) {
   try {
     const id = req.params.id
     const response = await PantryItem.findById(id)
+    if (!response) {
+      res.status(404).json({ error: err.message });
+    }
     res.status(200).json(response)
   } catch (err) {
-    res.status(404).send({ error: err.message });
+    res.status(500).json({ error: err.message });
   }
 }
+
 
 async function addItem(req,res) {
   try{
     const data = req.body
     const response = await PantryItem.create(data)
-    res.status(200).json(response)
+    res.status(201).json(response)
   } catch (err){
     res.status(409).send({ error: err.message });
   }
@@ -31,6 +35,7 @@ async function addItem(req,res) {
 
 async function updateStatus(req, res) {
   try {
+    const validStatuses = ["available", "donated", "used", "wasted"];
     const id = req.params.id;
     const { status } = req.body;
 
