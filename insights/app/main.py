@@ -59,6 +59,10 @@ def analytics(items: list[dict]):
 
     expiring_soon_items = expiring_soon_df[['name', 'quantity', 'expiry_date']].to_dict(orient='records')
 
+    # Current Stock
+    current_stock_df = df[df['status']  == 'available']
+    current_stock_items = current_stock_df[['name', 'quantity', 'expiry_date']]
+
 
     
     return {
@@ -71,5 +75,7 @@ def analytics(items: list[dict]):
         "used_percentage": used_percentage,
         "total_available": total_available,
         "available_percentage": available_percentage,
-        "monthly_analysis" : monthly_analysis
+        "monthly_analysis" : monthly_analysis,
+        "total_expiring_soon" : total_expiring_soon,
+        "current_stock_items" : current_stock_items
     }
