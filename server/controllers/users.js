@@ -38,7 +38,7 @@ async function register(req, res) {
     const salt = await bcrypt.genSalt(parseInt(process.env.BCRYPT_SALT_ROUNDS));
     const hashedPassword = await bcrypt.hash(data.password, salt);
 
-    const new_user = await User.create({
+    const newUser = await User.create({
       username: data.username,
       password: hashedPassword,
     });
