@@ -10,6 +10,10 @@ def health():
 
 @app.post("/analytics")
 def analytics(items: list[dict]):
+
+    print(f"SUCCESS: Received {len(items)} items from Express!")
+    if len(items) > 0:
+        print("Sample item:", items[0])
     
     df = pd.DataFrame(items)
     df['expiry_date'] = pd.to_datetime(df['expiry_date'])
