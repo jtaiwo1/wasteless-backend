@@ -15,13 +15,10 @@ CREATE TABLE pantry (
     CHECK (quantity > 0),
   expiry_date DATE,
   status VARCHAR(20) NOT NULL DEFAULT 'available'
-    CHECK (status IN ('available', 'donated', 'used', 'wasted'))
+    CHECK (status IN ('available', 'donated', 'used', 'wasted')),
   status_update_date DATE
 );
 
-
-TRUNCATE TABLE pantry RESTART IDENTITY CASCADE;
-TRUNCATE TABLE users RESTART IDENTITY CASCADE
 
 INSERT INTO users (username, password) VALUES
 ('user_one', 'password123'),

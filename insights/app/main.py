@@ -20,7 +20,7 @@ def health():
 def analytics(user_id: int):
     try:
         query = f"""
-            SELECT name, quantity, expiry_date, status
+            SELECT name, quantity, expiry_date, status, status_update_date
             FROM pantry
             WHERE user_id = {user_id}
         """
@@ -54,7 +54,7 @@ def analytics(user_id: int):
 
 
 
-    total_quantity = df['quantity'].sum()
+    total_quantity = int(df['quantity'].sum())
 
     # Analytics
     total_donated = int(df[df['status'] == 'donated']['quantity'].sum())
@@ -69,8 +69,8 @@ def analytics(user_id: int):
     available_percentage = round((total_available / total_quantity) * 100, 2) if total_quantity > 0 else 0
 
     # Advanced Monhtly
-    df['effective_date'] = df['status_update_at'].fillna(df['expiry_date'])
-    df['year_month'] = df['effective'].dt.to_period('M').astype(str)
+    df['effective_date'] = df['status_update_date'].fillna(df['expiry_date'])
+    df['year_month'] = df['effective_date'].dt.to_period('M').astype(str)
 
     monthly = df.groupby(['year_month', 'status'])['quantity'].sum().unstack(fill_value=0)
 
