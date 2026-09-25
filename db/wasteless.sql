@@ -23,6 +23,10 @@ CREATE TABLE pantry (
 TRUNCATE TABLE pantry RESTART IDENTITY CASCADE;
 TRUNCATE TABLE users RESTART IDENTITY CASCADE
 
+INSERT INTO users (username, password) VALUES
+('user_one', 'password123'),
+('user_two', 'password123');
+
 INSERT INTO pantry (name, quantity, expiry_date, status, status_update_date) VALUES
 ('Whole Milk', 2, '2026-09-20', 'wasted', '2026-09-22'),
 ('Sourdough Bread', 1, '2026-09-25', 'used', '2026-09-23'),
