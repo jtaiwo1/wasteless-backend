@@ -96,21 +96,21 @@ def analytics(user_id: int):
 
     # Current Stock
     current_stock_df = df[df['status']  == 'available']
-    current_stock_items = current_stock_df[['name', 'quantity', 'expiry_date']]
+    current_stock_items = current_stock_df[['name', 'quantity', 'expiry_date']].to_dict(orient='records')
 
 
     
     return {
         "total_items": int(total_quantity),
-        "total_donated": total_donated,
-        "donated_percentage": donated_percentage,
-        "total_wasted": total_wasted,
-        "wasted_percentage": wasted_percentage,
-        "total_used": total_used,
-        "used_percentage": used_percentage,
-        "total_available": total_available,
-        "available_percentage": available_percentage,
+        "total_donated": int(total_donated),
+        "donated_percentage": float(donated_percentage),
+        "total_wasted": int(total_wasted),
+        "wasted_percentage": float(wasted_percentage),
+        "total_used": int(total_used),
+        "used_percentage": float(used_percentage),
+        "total_available": int(total_available),
+        "available_percentage": float(available_percentage),
         "monthly_analysis" : monthly_analysis,
-        "total_expiring_soon" : total_expiring_soon,
+        "total_expiring_soon" : int(total_expiring_soon),
         "current_stock_items" : current_stock_items
     }
