@@ -1,19 +1,54 @@
-from fastapi import FastAPI
-import pandas as pd 
+import os
+from fastapi import FastAPI, HTTPException
+import pandas as pd
+from sqlalchemy import create_engine
 from datetime import datetime
+from dotenv import load_dotenv
 
+load_dotenv()
 app = FastAPI()
+
+DB_URL = os.getenv("DATABASE_URL")
+engine = create_engine(DB_URL)
+
 
 @app.get("/health")
 def health():
     return {"status": "ok"}
 
-@app.post("/analytics")
-def analytics(items: list[dict]):
+@app.get("/analytics/{user_id}")
+def analytics(user_id: int):
+    try:
+        query = f"""
+            SELECT name, quantity, expiry_date, status
+            FROM pantry
+            WHERE user_id = {user_id}
+        """
+        df = pd.read_sql(query, con=engine)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+    if df.empty:
+        return {
+            "message":"User has no items",
+            "total_items": 0,
+            "total_donated": 0,
+            "donated_percentage": 0,
+            "total_wasted":  0,
+            "wasted_percentage":  0,
+            "total_used": 0,
+            "used_percentage": 0,
+            "total available": 0,
+            "available_percentage": 0,
+            "monthly_metrics": [],
+            "total_expiring_soon": 0,
+            "expiring_soon_items": [],
+            "current_stock_items": []
+        }
 
 
     
-    df = pd.DataFrame(items)
+    ## df = pd.DataFrame(items)
     df['expiry_date'] = pd.to_datetime(df['expiry_date'])
     df['status_update_date'] = pd.to_datetime(df['status_update_date'])
 
