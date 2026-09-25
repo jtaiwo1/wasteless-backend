@@ -1,25 +1,60 @@
-from fastapi import FastAPI
-import pandas as pd 
+import os
+from fastapi import FastAPI, HTTPException
+import pandas as pd
+from sqlalchemy import create_engine
 from datetime import datetime
+from dotenv import load_dotenv
 
+load_dotenv()
 app = FastAPI()
+
+DB_URL = os.getenv("DATABASE_URL")
+engine = create_engine(DB_URL)
+
 
 @app.get("/health")
 def health():
     return {"status": "ok"}
 
-@app.post("/analytics")
-def analytics(items: list[dict]):
+@app.get("/analytics/{user_id}")
+def analytics(user_id: int):
+    try:
+        query = f"""
+            SELECT name, quantity, expiry_date, status, status_update_date
+            FROM pantry
+            WHERE user_id = {user_id}
+        """
+        df = pd.read_sql(query, con=engine)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+    if df.empty:
+        return {
+            "message":"User has no items",
+            "total_items": 0,
+            "total_donated": 0,
+            "donated_percentage": 0,
+            "total_wasted":  0,
+            "wasted_percentage":  0,
+            "total_used": 0,
+            "used_percentage": 0,
+            "total available": 0,
+            "available_percentage": 0,
+            "monthly_metrics": [],
+            "total_expiring_soon": 0,
+            "expiring_soon_items": [],
+            "current_stock_items": []
+        }
 
 
     
-    df = pd.DataFrame(items)
+    ## df = pd.DataFrame(items)
     df['expiry_date'] = pd.to_datetime(df['expiry_date'])
     df['status_update_date'] = pd.to_datetime(df['status_update_date'])
 
 
 
-    total_quantity = df['quantity'].sum()
+    total_quantity = int(df['quantity'].sum())
 
     # Analytics
     total_donated = int(df[df['status'] == 'donated']['quantity'].sum())
@@ -34,8 +69,8 @@ def analytics(items: list[dict]):
     available_percentage = round((total_available / total_quantity) * 100, 2) if total_quantity > 0 else 0
 
     # Advanced Monhtly
-    df['effective_date'] = df['status_update_at'].fillna(df['expiry_date'])
-    df['year_month'] = df['effective'].dt.to_period('M').astype(str)
+    df['effective_date'] = df['status_update_date'].fillna(df['expiry_date'])
+    df['year_month'] = df['effective_date'].dt.to_period('M').astype(str)
 
     monthly = df.groupby(['year_month', 'status'])['quantity'].sum().unstack(fill_value=0)
 
@@ -61,21 +96,21 @@ def analytics(items: list[dict]):
 
     # Current Stock
     current_stock_df = df[df['status']  == 'available']
-    current_stock_items = current_stock_df[['name', 'quantity', 'expiry_date']]
+    current_stock_items = current_stock_df[['name', 'quantity', 'expiry_date']].to_dict(orient='records')
 
 
     
     return {
         "total_items": int(total_quantity),
-        "total_donated": total_donated,
-        "donated_percentage": donated_percentage,
-        "total_wasted": total_wasted,
-        "wasted_percentage": wasted_percentage,
-        "total_used": total_used,
-        "used_percentage": used_percentage,
-        "total_available": total_available,
-        "available_percentage": available_percentage,
+        "total_donated": int(total_donated),
+        "donated_percentage": float(donated_percentage),
+        "total_wasted": int(total_wasted),
+        "wasted_percentage": float(wasted_percentage),
+        "total_used": int(total_used),
+        "used_percentage": float(used_percentage),
+        "total_available": int(total_available),
+        "available_percentage": float(available_percentage),
         "monthly_analysis" : monthly_analysis,
-        "total_expiring_soon" : total_expiring_soon,
+        "total_expiring_soon" : int(total_expiring_soon),
         "current_stock_items" : current_stock_items
     }
