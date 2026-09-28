@@ -55,7 +55,7 @@ describe('PantryItem', () => {
         })
     })
 
-     describe('create', () => {
+    describe('create', () => {
 
         it ('Successfully creates and returns and new pantry item', async () => {
             const newItem = { id: 1, user_id: 1, name: 'Banana', quantity: 5 }
@@ -87,6 +87,44 @@ describe('PantryItem', () => {
             await expect(PantryItem.create(invalidItemData)).rejects.toThrow("Item name is required")
         })
     })
+
+    describe('updateStatus', ()  => {
+        it('successfull updates and returns the pantry item status', async () => {
+            const updatedRow = {
+                id: 1, 
+                user_id: 1, 
+                name: 'Apple', 
+                quantity: 10, 
+                expiry_date: null, 
+                status: 'Wasted', 
+                status_updated_at: '2026-09-28'
+            }
+
+            jest.spyOn(db, 'query').mockResolvedValueOnce({ rows: [updatedRow] })
+
+            const item = await PantryItem.updateStatus(1, 'Wasted')
+
+            expect(item).toBeInstanceOf(PantryItem)
+            expect(item.status).toBe('Wasted')
+
+            expect(db.query).toHaveBeenCalledWith(
+                expect.stringContaining('UPDATE pantry'),
+                ['Wasted', 1]
+            )
+        })
+
+        it('returns null when updating an item that does not exist', async () => {
+            jest.spyOn(db, 'query').mockResolvedValueOnce({ rows: [] })
+            const item =  await PantryItem.updateStatus(999, 'Wasted')
+
+            expect(item).toBeNull()
+            expect(db.query).toHaveBeenCalledWith(
+                expect.stringContaining('UPDATE pantry'),
+                ['Wasted', 999]
+            )
+        })
+    })
+
 
     
 });
