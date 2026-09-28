@@ -1,13 +1,13 @@
 const { Router } = require("express");
 const pantryController = require("../controllers/pantry");
+const authenticator = require("../middleware/authenticate")
 
 const pantryRouter = Router();
 
-pantryRouter.get("/", pantryController.index);
-pantryRouter.get("/user/:user_id", pantryController.findByUserId);
-pantryRouter.post("/", pantryController.addItem);
-pantryRouter.patch("/:id/status", pantryController.updateStatus)
-pantryRouter.delete("/:id", pantryController.deleteItem)
+pantryRouter.get("/", authenticator, pantryController.index);
+pantryRouter.post("/", authenticator, pantryController.addItem);
+pantryRouter.patch("/:id/status", authenticator, pantryController.updateStatus)
+pantryRouter.delete("/:id", authenticator, pantryController.deleteItem)
 
 
 

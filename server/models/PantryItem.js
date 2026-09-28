@@ -34,6 +34,18 @@ class PantryItem {
     return result.rows.map((row) => new PantryItem(row));
   }
 
+  static async findById(id, user_id) {
+    const result = await db.query("SELECT * FROM pantry WHERE id = $1 AND user_id = $2",
+      [id, user_id]
+    )
+
+    if (!result.rows[0]){
+      return null
+    }
+
+    return new PantryItem(result.rows[0])
+  }
+
   static async create(item) {
     if (!item.name) {
       throw new Error("Item name is required");
@@ -53,16 +65,13 @@ class PantryItem {
     return new PantryItem(result.rows[0]);
   }
 
-  static async updateStatus(id, status) {
-    const result = await db.query(
-      `UPDATE pantry
-     SET
-       status = $1,
-       status_updated_at = CURRENT_DATE
-     WHERE id = $2
-     RETURNING *`,
-      [status, id],
-    );
+  async updateStatus(status) {
+    const result = await db.query("UPDATE pantry SET status = $1, status_updated_at = CURRENT_DATE WHERE id = $2 AND user_id = $3 RETURNING *", 
+    [
+      status,
+      this.id,
+      this.user_id
+    ])
 
     if (!result.rows[0]) {
       return null;
@@ -75,12 +84,16 @@ class PantryItem {
     const result = await db.query(
       `DELETE FROM pantry
        WHERE id = $1
+       AND user_id = $2
        RETURNING *`,
-      [this.id],
+      [
+        this.id,
+        this.user_id
+      ]
     );
 
     if (!result.rows[0]) {
-      throw new Error("Unable to delete item.");
+      return null;
     }
 
     return new PantryItem(result.rows[0]);
