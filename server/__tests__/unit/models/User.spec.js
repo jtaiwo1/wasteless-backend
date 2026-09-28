@@ -33,4 +33,36 @@ describe('User Model', () => {
         })
     })
 
+    describe('getByUsername', () => {
+        it('should return user when valid username is provided', async () => {
+            const mock = {
+                user_id: 1,
+                username: 'user1',
+                password: 'password'
+            }
+            db.query.mockResolvedValueOnce({ rows: [mock] })
+
+            const user = await User.getByUsername('user1')
+
+            expect(user).toEqual(mock)
+            expect(user.username).toBe('user1')
+            expect(db.query).toHaveBeenCalledWith(
+                expect.stringContaining('SELECT * FROM users WHERE username = $1'), 
+                ['user1']
+            )
+        })
+
+        it('should return null when the username does not exist', async () => {
+            db.query.mockResolvedValueOnce({ rows: [] });
+
+            const user = await User.getByUsername('user2');
+
+            expect(user).toBeNull();
+            expect(db.query).toHaveBeenCalledWith(
+                expect.stringContaining('SELECT * FROM users WHERE username = $1;'),
+                ['user2']
+            );
+        })
+    })
+
 })
