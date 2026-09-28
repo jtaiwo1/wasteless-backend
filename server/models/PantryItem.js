@@ -25,14 +25,13 @@ class PantryItem {
     return result.rows.map((row) => new PantryItem(row));
   }
 
-  static async findById(id) {
-    const result = await db.query("SELECT * FROM pantry WHERE id = $1", [id]);
+  static async findByUserId(user_id) {
+    const result = await db.query(
+      "SELECT * FROM pantry WHERE user_id = $1 ORDER BY id",
+      [user_id],
+    );
 
-    if (!result.rows[0]) {
-      return null;
-    }
-
-    return new PantryItem(result.rows[0]);
+    return result.rows.map((row) => new PantryItem(row));
   }
 
   static async create(item) {

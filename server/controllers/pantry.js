@@ -9,13 +9,10 @@ async function index(req, res) {
   }
 }
 
-async function findById(req,res) {
+async function findByUserId(req,res) {
   try {
-    const id = req.params.id
-    const response = await PantryItem.findById(id)
-    if (!response) {
-      res.status(404).json({ error: err.message });
-    }
+    const user_id = req.params.id
+    const response = await PantryItem.findByUserId(user_id)
     res.status(200).json(response)
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -68,4 +65,4 @@ async function deleteItem(req,res) {
     res.status(404).json({error: err.message })
   }
 }
-module.exports = { index, findById, addItem, updateStatus, deleteItem};
+module.exports = { index, findByUserId, addItem, updateStatus, deleteItem};
