@@ -58,6 +58,10 @@ pipeline {
         }
 
         stage('Terraform Init') {
+            when {
+                changeset "terraform/**"
+                }
+
             steps{
                 dir('terraform/infrastructure') {
                     sh 'terraform init -reconfigure'
@@ -66,6 +70,10 @@ pipeline {
         }
 
         stage('Terraform Plan') {
+            when {
+                changeset "terraform/**"
+                }
+
             steps{
                 dir('terraform/infrastructure') {
                     sh 'terraform plan -out=tfplan'
@@ -77,6 +85,10 @@ pipeline {
         }
 
         stage('Terraform Apply') {
+            when {
+                changeset "terraform/**"
+                }
+                
             steps {
                 script {
                     timeout(time: 15, unit: 'MINUTES') {
