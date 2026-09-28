@@ -10,7 +10,7 @@ describe('PantryItem', () => {
         it('pantry items on a successful db query', async () => {
             const mockPantry = [
                 { id: 1, user_id: 1, name: 'Apple', quantity: 10, expiry_date: null, status: 'available', status_updated_at: null },
-                { id: 2, user_id: 1, name: 'Milk', quantity: 5, expiry_date: null, status: 'available', status_updated_at: null }
+                { id: 2, user_id: 1, name: 'Milk', quantity: 5, expiry_date: null, status: 'available', status_update_date: null }
             ]
             jest.spyOn(db, 'query').mockResolvedValueOnce({ rows: mockPantry})
 
@@ -31,4 +31,27 @@ describe('PantryItem', () => {
         
         });
     });
+
+    describe('findById', () => {
+
+        it ('Shows a pantry item when a ID is provided', async () => {
+            const mockItem = { id: 1, user_id: 1, name: 'Apple', quantity: 5, expiry_date: null, status: 'available', status_update_date: null}
+
+            jest.spyOn(db, 'query').mockResolvedValueOnce({ rows: [mockItem] })
+            const item = await PantryItem.findById(1)
+
+            expect(item).toBeInstanceOf(PantryItem)
+            expect(item.name).toBe('Apple')
+            expect(db.query).toHaveBeenCalledWith("SELECT * FROM pantry WHERE id = $1", [1]);
+
+        })
+
+        it('returns null when no pantry item is found with the given ID', async () => {
+            jest.spyOn(db, 'query').mockResolvedValueOnce({ rows: [] })
+            const item = await PantryItem.findById(999)
+
+            expect(item).toBeNull()
+            expect(db.query).toHaveBeenCalledWith("SELECT * FROM pantry WHERE id = $1", [999])
+        })
+    })
 });
