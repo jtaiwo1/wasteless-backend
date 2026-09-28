@@ -70,6 +70,7 @@ async function login(req, res) {
             res.status(200).send({
                 success: true,
                 token: token,
+                user_id: user.user_id
             })
         }
 
