@@ -120,9 +120,11 @@ pipeline {
         }
     }
 }
+   
+}
 
-    post {
+post {
         success { echo "Pushed ${IMAGE_TAG}" }
         failure { echo "FAILED — see ${BUILD_URL}console" }
     }
-}}
+}
