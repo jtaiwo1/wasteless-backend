@@ -125,6 +125,52 @@ describe('PantryItem', () => {
         })
     })
 
+    describe('destroy', () => {
+        it('Successfully deletes and returns the pantry items', async () => {
+            const row = {
+                id: 1, 
+                user_id: 1, 
+                name: 'Apple', 
+                quantity: 10, 
+                expiry_date: null, 
+                status: 'available', 
+                status_updated_at: null
+            }
+
+            const item = new PantryItem(row)
+
+            jest.spyOn(db, 'query').mockResolvedValueOnce({ rows: [row] })
+            const deleted = await item.destroy()
+
+            expect(deleted).toBeInstanceOf(PantryItem)
+            expect(db.query).toHaveBeenCalledWith(
+                expect.stringContaining('DELETE FROM pantry'), 
+                [1]
+            )
+        })
+
+        it('throws an error if the item cannot be found to delete', async () => {
+            const row = {
+                id: 999, 
+                user_id: 1, 
+                name: 'Apple', 
+                quantity: 10, 
+                expiry_date: null, 
+                status: 'available', 
+                status_updated_at: null   
+            }
+
+            const item = new PantryItem(row)
+            jest.spyOn(db, 'query').mockResolvedValueOnce({ rows: [] })
+
+            await expect(item.destroy()).rejects.toThrow("Unable to delete item")
+            expect(db.query).toHaveBeenCalledWith(
+                expect.stringContaining('DELETE FROM pantry'), 
+                [999]
+            )
+        })
+    })
+
 
     
 });
