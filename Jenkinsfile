@@ -107,14 +107,19 @@ pipeline {
                     credentialsId: 'wasteless-vm-ssh',
                     keyFileVariable: 'SSH_KEY',
                     usernameVariable: 'SSH_USER'
-                )]) {
-                sh 'ssh -i "$SSH_KEY" -o StrictHostKeyChecking=accept-new "$SSH_USER@$VM_HOST"'
-                sh 'cd /opt/app'
-                sh 'docker compose pull wasteless-api wasteless-insights && docker compose up -d wasteless-api wasteless-insights && docker compose ps'
-            }
+                    )]) {
+                        sh '''
+                        ssh -i "$SSH_KEY" \
+                        -o StrictHostKeyChecking=accept-new \
+                        "$SSH_USER@$VM_HOST" \
+                        'cd /opt/app && \
+                        docker compose pull wasteless-api wasteless-insights && \
+                        docker compose up -d wasteless-api wasteless-insights && \
+                        docker compose ps'
+            '''
         }
-
     }
+}
 
     post {
         success { echo "Pushed ${IMAGE_TAG}" }
