@@ -54,4 +54,39 @@ describe('PantryItem', () => {
             expect(db.query).toHaveBeenCalledWith("SELECT * FROM pantry WHERE id = $1", [999])
         })
     })
+
+     describe('create', () => {
+
+        it ('Successfully creates and returns and new pantry item', async () => {
+            const newItem = { id: 1, user_id: 1, name: 'Banana', quantity: 5 }
+            const createdRow = {
+                id: 3, 
+                user_id: 1, 
+                name: 'Banana', 
+                quantity: 5, 
+                expiry_date: null, 
+                status: 'available', 
+                status_updated_at: null
+            }
+
+            jest.spyOn(db, 'query').mockResolvedValueOnce({ rows: [createdRow] })
+            const item = await PantryItem.create(newItem)
+
+            expect(item).toBeInstanceOf(PantryItem)
+            expect(item.name).toBe('Banana')
+            expect(item.quantity).toBe(5)
+            expect(db.query).toHaveBeenCalledWith(
+                "INSERT INTO pantry(user_id, name, quantity, expiry_date, status) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+                [1, 'Banana', 5, null, 'available']
+            );
+
+        })
+
+        it('throws an error when item name is missing', async () => {
+            const invalidItemData = { user_id: 1, quantity: 2 }
+            await expect(PantryItem.create(invalidItemData)).rejects.toThrow("Item name is required")
+        })
+    })
+
+    
 });
