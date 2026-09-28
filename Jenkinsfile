@@ -10,6 +10,7 @@ pipeline {
         ARM_CLIENT_SECRET   = credentials('azure-client-secret')
         ARM_SUBSCRIPTION_ID = credentials('azure-subscription-id')
         ARM_TENANT_ID       = credentials('azure-tenant-id')
+        VM_HOST = '4.225.221.72'
     }
 
     stages {
@@ -57,6 +58,10 @@ pipeline {
         }
 
         stage('Terraform Init') {
+            when {
+                changeset "terraform/**"
+                }
+
             steps{
                 dir('terraform/infrastructure') {
                     sh 'terraform init -reconfigure'
@@ -65,6 +70,10 @@ pipeline {
         }
 
         stage('Terraform Plan') {
+            when {
+                changeset "terraform/**"
+                }
+
             steps{
                 dir('terraform/infrastructure') {
                     sh 'terraform plan -out=tfplan'
@@ -76,6 +85,10 @@ pipeline {
         }
 
         stage('Terraform Apply') {
+            when {
+                changeset "terraform/**"
+                }
+                
             steps {
                 script {
                     timeout(time: 15, unit: 'MINUTES') {
@@ -85,6 +98,25 @@ pipeline {
                 dir('terraform/infrastructure') {
                     sh 'terraform apply -auto-approve tfplan'
                 }
+            }
+        }
+
+        stage('Deployment Stage') {
+            steps {
+                withCredentials([sshUserPrivateKey(
+                    credentialsId: 'wasteless-vm-ssh',
+                    keyFileVariable: 'SSH_KEY',
+                    usernameVariable: 'SSH_USER'
+                )])
+                sh '''
+                ssh -i "$SSH_KEY" \
+                    -o StrictHostKeyChecking=accept-new \
+                    "$SSH_USER@$VM_HOST" \
+                    'cd /opt/app && \
+                     docker compose pull wasteless-api wasteless-insights && \
+                     docker compose up -d wasteless-api wasteless-insights && \
+                     docker compose ps'
+            '''
             }
         }
 
