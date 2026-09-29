@@ -91,6 +91,38 @@ describe('Pantry Controller', () => {
             expect(mockStatus).toHaveBeenCalledWith(409);
             expect(mockSend).toHaveBeenCalledWith({ error: "Item already exists" });
         });
+
+
+        describe('updateStatus', () => {
+            it('returns 400 error if invalid status is given', async () => {
+                const req = {
+                    params: { id: "1"},
+                    user: { user_id: 1 },
+                    body: { status: 'dead'}
+                }
+
+                await pantryController.updateStatus(req, mockRes)
+
+                expect(mockStatus).toHaveBeenCalledWith(400)
+                expect(mockJson).toHaveBeenCalledWith({ error: 'Invalid pantry status'})
+            })
+
+            it('returns a 404 error if the pantry item is not found', async () => {
+                Pantryitem.findById.mockResolvedValueOnce(null)
+
+                const req ={
+                    params: { id: '999' },
+                    user:  { user_id: 1 },
+                    body: { status: 'used'}
+                }
+
+                await pantryController.updateStatus(req, mockRes)
+
+                expect(Pantryitem.findById).toHaveBeenCalledWith('999', 1)
+                expect(mockStatus).toHaveBeenCalledWith(404)
+                expect(mockJson).toHaveBeenCalledWith({ error: 'Pantry item not found' })
+            })
+        })
     });
 
 
