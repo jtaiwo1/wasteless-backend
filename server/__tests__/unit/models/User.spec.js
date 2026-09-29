@@ -65,4 +65,42 @@ describe('User Model', () => {
         })
     })
 
+    describe('create', () => {
+        it('should successfully create and return a new user instance', async () => {
+            const rawData = { username: 'user1', password: 'password123' }
+            const mockUser = { user_id: 1, username: 'user1', password: 'password123' }
+
+            db.query.mockResolvedValueOnce({ rows: [mockUser] })
+
+            const user = await User.create(rawData)
+
+            expect(user).toBeInstanceOf(User)
+            expect(user.username).toBe('user1')
+            expect(db.query).toHaveBeenCalledWith(
+                expect.stringContaining('INSERT INTO users'),
+                ['user1', 'password123']
+            )
+        })
+
+        it('should throw an error if username is missing', async () => {
+            const rawData = { password: 'password123' }
+
+            await expect(User.create(rawData)).rejects.toThrow('username is missing')
+            expect(db.query).not.toHaveBeenCalledWith()
+        })
+
+        it('should throw an error if password is missing', async () => {
+            const rawData = { username: 'user1' }
+            await expect(User.create(rawData)).rejects.toThrow('Password is missing')
+            expect(db.query).not.toHaveBeenCalledWith()
+        })
+
+        it('should throw a generic error if the database query fails', async () => {
+            const rawData = { username: 'testuser', password: 'securepassword' };
+            db.query.mockRejectedValueOnce(new Error('Database error'));
+
+            await expect(User.create(rawData)).rejects.toThrow("Username is missing");
+        });
+    })
+
 })
