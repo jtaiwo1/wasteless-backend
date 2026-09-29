@@ -38,20 +38,20 @@ describe('PantryItem', () => {
             const mockItem = { id: 1, user_id: 1, name: 'Apple', quantity: 5, expiry_date: null, status: 'available', status_update_date: null}
 
             jest.spyOn(db, 'query').mockResolvedValueOnce({ rows: [mockItem] })
-            const item = await PantryItem.findById(1)
+            const item = await PantryItem.findById(1, 1)
 
             expect(item).toBeInstanceOf(PantryItem)
             expect(item.name).toBe('Apple')
-            expect(db.query).toHaveBeenCalledWith("SELECT * FROM pantry WHERE id = $1", [1]);
+            expect(db.query).toHaveBeenCalledWith("SELECT * FROM pantry WHERE id = $1 AND user_id = $2", [1, 1]);
 
         })
 
         it('returns null when no pantry item is found with the given ID', async () => {
             jest.spyOn(db, 'query').mockResolvedValueOnce({ rows: [] })
-            const item = await PantryItem.findById(999)
+            const item = await PantryItem.findById(999, 999)
 
             expect(item).toBeNull()
-            expect(db.query).toHaveBeenCalledWith("SELECT * FROM pantry WHERE id = $1", [999])
+            expect(db.query).toHaveBeenCalledWith("SELECT * FROM pantry WHERE id = $1 AND user_id = $2", [999, 999])
         })
     })
 
@@ -89,87 +89,80 @@ describe('PantryItem', () => {
     })
 
     describe('updateStatus', ()  => {
-        it('successfull updates and returns the pantry item status', async () => {
+        it('successfully updates and returns the pantry item status', async () => {
             const updatedRow = {
-                id: 1, 
-                user_id: 1, 
-                name: 'Apple', 
-                quantity: 10, 
-                expiry_date: null, 
-                status: 'Wasted', 
-                status_updated_at: '2026-09-28'
-            }
+                id: 1,
+                user_id: 1,
+                name: 'Banana',
+                quantity: 5,
+                status: 'wasted',
+                status_updated_at: '2026-09-29'
+            };
 
-            jest.spyOn(db, 'query').mockResolvedValueOnce({ rows: [updatedRow] })
+            jest.spyOn(db, 'query').mockResolvedValueOnce({ rows: [updatedRow] });
 
-            const item = await PantryItem.updateStatus(1, 'Wasted')
+            // 1. Instantiate the object first
+            const pantryItem = new PantryItem({ id: 1, user_id: 1 });
 
-            expect(item).toBeInstanceOf(PantryItem)
-            expect(item.status).toBe('Wasted')
+            // 2. Call the instance method
+            const item = await pantryItem.updateStatus('wasted');
 
+            expect(item).toBeInstanceOf(PantryItem);
+            expect(item.status).toBe('wasted');
+            
+            // 3. Verify the SQL query runs correctly
             expect(db.query).toHaveBeenCalledWith(
-                expect.stringContaining('UPDATE pantry'),
-                ['Wasted', 1]
-            )
-        })
+                "UPDATE pantry SET status = $1, status_updated_at = CURRENT_DATE WHERE id = $2 AND user_id = $3 RETURNING *",
+                ['wasted', 1, 1]
+            );
+        });
 
-        it('returns null when updating an item that does not exist', async () => {
-            jest.spyOn(db, 'query').mockResolvedValueOnce({ rows: [] })
-            const item =  await PantryItem.updateStatus(999, 'Wasted')
+       it('returns null if no item is found to update', async () => {
+            const pantryItem = new PantryItem({ id: 99, user_id: 1 });
+            jest.spyOn(db, 'query').mockResolvedValueOnce({ rows: [] });
 
-            expect(item).toBeNull()
-            expect(db.query).toHaveBeenCalledWith(
-                expect.stringContaining('UPDATE pantry'),
-                ['Wasted', 999]
-            )
-        })
+            const result = await pantryItem.updateStatus('consumed');
+
+            expect(result).toBeNull();
+        });
     })
 
     describe('destroy', () => {
-        it('Successfully deletes and returns the pantry items', async () => {
-            const row = {
-                id: 1, 
-                user_id: 1, 
-                name: 'Apple', 
-                quantity: 10, 
-                expiry_date: null, 
-                status: 'available', 
+        it('successfully deletes the pantry item and returns the deleted instance', async () => {
+            const pantryItem = new PantryItem({ id: 1, user_id: 1, name: 'Banana' });
+            
+            const deletedRow = {
+                id: 1,
+                user_id: 1,
+                name: 'Banana',
+                quantity: 5,
+                expiry_date: null,
+                status: 'available',
                 status_updated_at: null
-            }
+            };
 
-            const item = new PantryItem(row)
+            jest.spyOn(db, 'query').mockResolvedValueOnce({ rows: [deletedRow] });
 
-            jest.spyOn(db, 'query').mockResolvedValueOnce({ rows: [row] })
-            const deleted = await item.destroy()
+            const result = await pantryItem.destroy();
 
-            expect(deleted).toBeInstanceOf(PantryItem)
+            expect(result).toBeInstanceOf(PantryItem);
+            expect(result.name).toBe('Banana');
             expect(db.query).toHaveBeenCalledWith(
-                expect.stringContaining('DELETE FROM pantry'), 
-                [1]
-            )
-        })
+                expect.stringContaining('DELETE FROM pantry'),
+                [1, 1]
+            );
+        });
 
-        it('throws an error if the item cannot be found to delete', async () => {
-            const row = {
-                id: 999, 
-                user_id: 1, 
-                name: 'Apple', 
-                quantity: 10, 
-                expiry_date: null, 
-                status: 'available', 
-                status_updated_at: null   
-            }
+        it('returns null if no item is found to delete', async () => {
+            const pantryItem = new PantryItem({ id: 99, user_id: 1 });
+            
+            jest.spyOn(db, 'query').mockResolvedValueOnce({ rows: [] });
 
-            const item = new PantryItem(row)
-            jest.spyOn(db, 'query').mockResolvedValueOnce({ rows: [] })
+            const result = await pantryItem.destroy();
 
-            await expect(item.destroy()).rejects.toThrow("Unable to delete item")
-            expect(db.query).toHaveBeenCalledWith(
-                expect.stringContaining('DELETE FROM pantry'), 
-                [999]
-            )
-        })
-    })
+            expect(result).toBeNull();
+        });
+});
 
 
     

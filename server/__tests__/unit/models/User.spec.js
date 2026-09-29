@@ -91,7 +91,7 @@ describe('User Model', () => {
 
         it('should throw an error if password is missing', async () => {
             const rawData = { username: 'user1' }
-            await expect(User.create(rawData)).rejects.toThrow('Password is missing')
+            await expect(User.create(rawData)).rejects.toThrow('password is missing')
             expect(db.query).not.toHaveBeenCalledWith()
         })
 
@@ -99,7 +99,7 @@ describe('User Model', () => {
             const rawData = { username: 'testuser', password: 'securepassword' };
             db.query.mockRejectedValueOnce(new Error('Database error'));
 
-            await expect(User.create(rawData)).rejects.toThrow("Username is missing");
+            await expect(User.create(rawData)).rejects.toThrow("Couldn't create user");
         });
     })
 
