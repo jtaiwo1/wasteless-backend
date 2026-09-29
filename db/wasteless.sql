@@ -21,7 +21,7 @@ CREATE TABLE pantry (
 
 
 INSERT INTO users (username, password) VALUES
-('user1@gmail.com', 'password123')
+('user1@gmail.com', 'password123');
 
 INSERT INTO pantry (user_id, name, quantity, expiry_date, status, status_update_date) VALUES 
 (1, 'Whole Milk', 2, '2026-03-05', 'wasted', '2026-03-07'),
