@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const pantryRouter = require("./routers/pantry");
 const charitiesRouter = require("./routers/charities");
-// const dashboardRouter = require("./routers/dashboard");
+const dashboardRouter = require("./routers/dashboard");
 const userRouter = require("./routers/users")
 const scanReceiptRouter = require('./routers/receiptScanner')
 
