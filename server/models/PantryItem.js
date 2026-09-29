@@ -66,7 +66,7 @@ class PantryItem {
   }
 
   async updateStatus(status) {
-    const result = await db.query("UPDATE pantry SET status = $1, status__at = CURRENT_DATE WHERE id = $2 AND user_id = $3 RETURNING *", 
+    const result = await db.query("UPDATE pantry SET status = $1, status_update_date = CURRENT_DATE WHERE id = $2 AND user_id = $3 RETURNING *", 
     [
       status,
       this.id,
