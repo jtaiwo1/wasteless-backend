@@ -26,10 +26,10 @@ class User {
     }
 
     static async create(data) {
-        try {  
-            if(!data.username){ throw new Error("username is missing") };
-            if(!data.password){ throw new Error("password is missing") };
+        if(!data.username){ throw new Error("username is missing") };
+        if(!data.password){ throw new Error("password is missing") };
 
+        try {  
             const response = await db.query("INSERT INTO users(username, password) VALUES($1, $2) RETURNING user_id, username;", [data.username.toLowerCase(), data.password])
             return new User(response.rows[0]);
 
