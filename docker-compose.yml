@@ -28,7 +28,7 @@ services:
     build:
       context: ./insights
     environment:
-      - DATABASE_URL: postgresql://postgres:${DB_PASSWORD}@wasteless-db:5432/wasteless
+      DATABASE_URL: postgresql://postgres:${DB_PASSWORD}@wasteless-db:5432/wasteless
     restart: always
     networks:
       - wasteless-network
