@@ -8,7 +8,7 @@ class PantryItem {
     quantity,
     expiry_date,
     status,
-    status_updated_at,
+    status_update_at,
   }) {
     this.id = id;
     this.user_id = user_id;
@@ -16,7 +16,7 @@ class PantryItem {
     this.quantity = quantity;
     this.expiry_date = expiry_date;
     this.status = status;
-    this.status_updated_at = status_updated_at;
+    this.status_update_at = status_update_at;
   }
 
   static async findAll() {
@@ -66,7 +66,7 @@ class PantryItem {
   }
 
   async updateStatus(status) {
-    const result = await db.query("UPDATE pantry SET status = $1, status_updated_at = CURRENT_DATE WHERE id = $2 AND user_id = $3 RETURNING *", 
+    const result = await db.query("UPDATE pantry SET status = $1, status_update_date = CURRENT_DATE WHERE id = $2 AND user_id = $3 RETURNING *", 
     [
       status,
       this.id,

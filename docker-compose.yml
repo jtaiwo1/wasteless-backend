@@ -27,6 +27,8 @@ services:
     image: jtaiwo1/wasteless-insights-cloud:latest
     build:
       context: ./insights
+    environment:
+      DATABASE_URL: postgresql://postgres:${DB_PASSWORD}@wasteless-db:5432/wasteless
     restart: always
     networks:
       - wasteless-network
