@@ -112,7 +112,7 @@ describe('PantryItem', () => {
             
             // 3. Verify the SQL query runs correctly
             expect(db.query).toHaveBeenCalledWith(
-                "UPDATE pantry SET status = $1, status_updated_at = CURRENT_DATE WHERE id = $2 AND user_id = $3 RETURNING *",
+                "UPDATE pantry SET status = $1, status_update_date = CURRENT_DATE WHERE id = $2 AND user_id = $3 RETURNING *",
                 ['wasted', 1, 1]
             );
         });
