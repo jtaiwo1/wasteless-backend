@@ -47,7 +47,7 @@ Our application helps users track surplus food in their home and matches those i
 ### Installation Front end
 
 - Follow instructions in this repo.
-- https://github.com/Rmorbey/wasteless-frontend/edit/main/README.md#wasteless
+- https://github.com/Rmorbey/wasteless-frontend/tree/main#wasteless
 
 ### Database Schema
 
